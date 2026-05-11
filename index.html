@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>빌리쌤 | 스레드 알려주는 남자</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface2: #1c1c1c;
+      --border: #2a2a2a;
+      --accent: #b5f254;
+      --accent2: #7ed957;
+      --text: #f0f0f0;
+      --muted: #888;
+      --tag-bg: #222;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans KR', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 80px;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(181,242,84,0.12) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 80%, rgba(126,217,87,0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .avatar-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2), #4af);
+      z-index: 0;
+    }
+
+    .avatar-wrap img {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--bg);
+      z-index: 1;
+    }
+
+    .badge {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      font-size: 14px;
+    }
+
+    .hero-name {
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .hero-name span {
+      color: var(--accent);
+    }
+
+    .hero-handle {
+      font-size: 0.95rem;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .hero-desc {
+      font-size: 1.05rem;
+      color: #ccc;
+      line-height: 1.8;
+    }
+
+    .hero-desc strong {
+      color: var(--accent);
+    }
+
+    .follower-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .follower-pill .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .tag {
+      background: var(--tag-bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #0a0a0a;
+      font-weight: 800;
+      font-size: 1rem;
+      padding: 14px 32px;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(181,242,84,0.25);
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(181,242,84,0.35);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900;
+      margin-bottom: 40px;
+      line-height: 1.2;
+    }
+
+    /* ── WEAPONS ── */
+    .weapons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .weapon-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .weapon-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+    }
+
+    .weapon-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(181,242,84,0.12);
+      border: 1px solid rgba(181,242,84,0.3);
+      color: var(--accent);
+      font-weight: 900;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .weapon-text {
+      font-size: 0.95rem;
+      color: #ddd;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    /* ── CHECKLIST ── */
+    .checklist {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .check-item:last-child { border-bottom: none; }
+
+    .check-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: rgba(181,242,84,0.15);
+      border: 1.5px solid var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-icon svg { display: none; }
+
+    .check-label {
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+
+    .check-text { font-size: 0.95rem; color: #ccc; line-height: 1.5; }
+
+    .checklist-warning {
+      margin-top: 24px;
+      background: rgba(255,80,80,0.08);
+      border: 1px solid rgba(255,80,80,0.2);
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: #ff9090;
+      text-align: center;
+    }
+
+    /* ── ROUTINE ── */
+    .routine-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .routine-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+
+    .routine-card:hover { border-color: var(--accent); }
+
+    .routine-num {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--accent);
+      opacity: 0.4;
+      line-height: 1;
+      min-width: 32px;
+    }
+
+    .routine-text { font-size: 0.9rem; color: #ccc; line-height: 1.6; }
+
+    /* ── GROWTH 10 ── */
+    .growth-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .growth-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 14px;
+      transition: background 0.15s;
+    }
+
+    .growth-item:hover { background: var(--surface); }
+
+    .growth-n {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      width: 24px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .growth-bar {
+      width: 3px;
+      height: 32px;
+      background: var(--border);
+      border-radius: 2px;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .growth-item:hover .growth-bar { background: var(--accent); }
+
+    .growth-text { font-size: 0.95rem; color: #ccc; line-height: 1.5; }
+
+    /* ── QUOTE ── */
+    .quote-section {
+      background: linear-gradient(135deg, rgba(181,242,84,0.07) 0%, rgba(126,217,87,0.03) 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .quote-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .quote-mark {
+      font-size: 4rem;
+      color: var(--accent);
+      line-height: 1;
+      font-weight: 900;
+      opacity: 0.4;
+    }
+
+    .quote-text {
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+      font-weight: 700;
+      line-height: 1.7;
+      margin: 12px 0 20px;
+    }
+
+    .quote-author {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer .footer-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .checklist { padding: 24px 20px; }
+      .section { padding: 60px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="avatar-wrap">
+        <img src="656294646_17915961807338251_5793899660251682439_n.jpg" alt="빌리쌤 프로필" />
+        <div class="badge">✦</div>
+      </div>
+
+      <div>
+        <div class="hero-name">Billy | <span>빌리쌤</span></div>
+        <div class="hero-handle">@billy___ssam</div>
+      </div>
+
+      <p class="hero-desc">
+        ✏️ <strong>스레드 알려주는 남자 [스알남]</strong><br />
+        대기업 출신 마케팅 기획자의 놀이터
+      </p>
+
+      <div class="follower-pill">
+        <span class="dot"></span>
+        팔로워 <strong>3.2만명</strong>
+      </div>
+
+      <div class="tags">
+        <span class="tag">마케팅인사이트</span>
+        <span class="tag">스레드 잘하는 법</span>
+        <span class="tag">경제공부</span>
+      </div>
+
+      <a class="cta-btn" href="https://litt.ly/threads_ssam_billy" target="_blank" rel="noopener">
+        ✦ 빌리쌤 링크 바로가기
+      </a>
+    </div>
+
+    <div class="scroll-hint">
+      <span>스크롤</span>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 3v10M3 9l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- 2026 무기 5가지 -->
+  <section class="section">
+    <p class="section-label">2026 핵심 전략</p>
+    <h2 class="section-title">꼭 갖춰야 할<br />무기 5가지</h2>
+    <div class="weapons-grid">
+      <div class="weapon-card">
+        <div class="weapon-num">1</div>
+        <div class="weapon-text">영향력 있는 <strong>개인 SNS</strong> 1개 이상</div>
+      </div>
+      <div class="weapon-card">
+        <div class="weapon-num">2</div>
+        <div class="weapon-text"><strong>영상 및 디자인 툴(Tool)</strong> 1개 이상</div>
+      </div>
+      <div class="weapon-card">
+        <div class="weapon-num">3</div>
+        <div class="weapon-text"><strong>바이브 코딩</strong>(클로드 등) 1개 이상</div>
+      </div>
+      <div class="weapon-card">
+        <div class="weapon-num">4</div>
+        <div class="weapon-text"><strong>투자</strong>(ETF, 국장, 미장 등) 1개 이상</div>
+      </div>
+      <div class="weapon-card">
+        <div class="weapon-num">5</div>
+        <div class="weapon-text"><strong>마케팅, 인문학, 심리학</strong> 중 1개 이상</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- 스레드 성장 체크리스트 -->
+  <section class="section">
+    <p class="section-label">셀프 진단</p>
+    <h2 class="section-title">스레드 성장을 위한<br />체크 리스트</h2>
+    <div class="checklist">
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">프로필명</span>당신을 부르기 편한가요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">프로필소개</span>'팔로잉' 이유가 있나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">프로필사진</span>'기억'시킬 수 있나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">고정게시글</span>'아이덴티티'가 있나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">유령게시글</span>24시간 돌리고 계시나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">메인주제</span>메인주제글은 70% 이상인가요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">브랜딩</span>당신은 '브랜딩' 키워드가 있나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">일관성</span>매일 일관성 있는 글을 올리나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">지속력</span>매일 댓글과 게시글의 양은 같나요?</p>
+      </div>
+      <div class="check-item">
+        <div class="check-icon"></div>
+        <p class="check-text"><span class="check-label">전달력</span>글마다 1개의 전달 메시지가 있나요?</p>
+      </div>
+      <div class="checklist-warning">
+        ⚠️ <strong>No가 5개 이상이라면 위험합니다</strong> — 내가 아니라, '타인'을 위한 글을 쓰고 있나요?
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <div class="quote-section">
+    <div class="quote-inner">
+      <div class="quote-mark">"</div>
+      <p class="quote-text">온전한 배움은<br />'편견' 없는 배움이다</p>
+      <p class="quote-author">— 빌리쌤 @billy___ssam</p>
+    </div>
+  </div>
+
+  <!-- 성장 루틴 -->
+  <section class="section">
+    <p class="section-label">마케팅 기획자의 루틴</p>
+    <h2 class="section-title">3.1만 성장<br />마케팅 루틴 10</h2>
+    <div class="routine-grid">
+      <div class="routine-card">
+        <div class="routine-num">01</div>
+        <div class="routine-text">아침(6~9시)은 '긍정' 브랜딩 글</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">02</div>
+        <div class="routine-text">저녁(9~11시)는 '핵심 주제' 글</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">03</div>
+        <div class="routine-text">댓글이 '달리는 글'로 노출 기회를 확보</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">04</div>
+        <div class="routine-text">대형계정에 '댓글 달기'는 장터로 활용</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">05</div>
+        <div class="routine-text">고정게시글은 '전환용' 글로 주기적 교체</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">06</div>
+        <div class="routine-text">'읽는 사람' 입장에서의 글만 작성</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">07</div>
+        <div class="routine-text">메인 주제 90%, 브랜딩 글 10% 배분</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">08</div>
+        <div class="routine-text">내 글에 댓글은 '티키타카'로 체류시간 확보</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">09</div>
+        <div class="routine-text">댓글 밀기형 게시글을 전략적으로 사용</div>
+      </div>
+      <div class="routine-card">
+        <div class="routine-num">10</div>
+        <div class="routine-text">삶과 스레드를 철저하게 '구분'하기</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- 성장 핵심 10가지 -->
+  <section class="section">
+    <p class="section-label">핵심 인사이트</p>
+    <h2 class="section-title">3.1만 성장의<br />핵심 10가지</h2>
+    <div class="growth-list">
+      <div class="growth-item">
+        <span class="growth-n">1</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">1년 동안 <strong>1개 주제</strong>로 일관성 유지하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">2</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">1년 동안 <strong>하루도 빠짐없이</strong> 글 쓰기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">3</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">철저하게 <strong>'독자' 중심</strong>의 글만 발행하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">4</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">'이득'과 '혜택'을 주는 <strong>글 구성</strong>하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">5</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text"><strong>부정적인 단어(주제)</strong> 절대 사용 안 하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">6</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text"><strong>저녁 피크타임</strong>은 2배 이상 발행하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">7</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">좋은 계정들을 <strong>주변에 항상 가까이</strong> 두기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">8</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">숫자 욕심보단, <strong>관계의 질</strong>에 집중하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">9</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text"><strong>첫 줄에 힘주고</strong>, 읽히는 글 구조 적용하기</p>
+      </div>
+      <div class="growth-item">
+        <span class="growth-n">10</span>
+        <div class="growth-bar"></div>
+        <p class="growth-text">결과를 <strong>분석하고, 테스트</strong>하는 습관 갖기</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER CTA -->
+  <div class="quote-section">
+    <div class="quote-inner">
+      <p style="font-size:0.85rem;color:var(--muted);margin-bottom:12px;">스레드 알려주는 남자 · 빌리쌤</p>
+      <h3 style="font-size:clamp(1.4rem,4vw,2rem);font-weight:900;margin-bottom:24px;">5가지의 무기만 있다면,<br /><span style="color:var(--accent)">뭐든 가능합니다.</span></h3>
+      <a class="cta-btn" href="https://litt.ly/threads_ssam_billy" target="_blank" rel="noopener">
+        ✦ 빌리쌤 팔로우 하기
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p class="footer-name">Billy | 빌리쌤</p>
+    <p>스레드 <a href="https://www.threads.net/@billy___ssam" target="_blank" rel="noopener">@billy___ssam</a> · <a href="https://litt.ly/threads_ssam_billy" target="_blank" rel="noopener">litt.ly/threads_ssam_billy</a></p>
+    <p style="margin-top:12px;font-size:0.78rem;opacity:0.5;">© 2026 빌리쌤. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
